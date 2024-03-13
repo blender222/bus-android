@@ -2,8 +2,8 @@ package com.ashtar.bus.common
 
 import android.util.Log
 import com.ashtar.bus.data.dao.TokenDao
-import com.ashtar.bus.data.model.TokenEntity
 import com.ashtar.bus.data.network.TokenApiService
+import com.ashtar.bus.model.TokenEntity
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,25 +17,26 @@ class SessionManager @Inject constructor(
     suspend fun initToken() {
         try {
             val storedToken = tokenDao.getToken()
-            accessToken = if (storedToken.isEmpty()) {
-                val token = tokenApiService.getToken()
-                tokenDao.insert(TokenEntity(1, token.accessToken))
-                token.accessToken
-            } else {
-                storedToken[0]
+            if (storedToken.isNotEmpty()) {
+                accessToken = storedToken[0]
+                return
             }
+            refreshToken()
         } catch (e: Exception) {
-            Log.e(this::class.simpleName, null, e)
+            Log.e("init token", null, e)
         }
     }
 
     suspend fun refreshToken() {
         try {
-            val token = tokenApiService.getToken()
-            tokenDao.update(TokenEntity(1, token.accessToken))
-            accessToken = token.accessToken
+            val response = tokenApiService.getToken()
+            if (response.isSuccessful) {
+                val body = response.body()!!
+                tokenDao.upsert(TokenEntity(1, body.accessToken))
+                accessToken = body.accessToken
+            }
         } catch (e: Exception) {
-            Log.e(this::class.simpleName, null, e)
+            Log.e("refresh token", null, e)
         }
     }
 }

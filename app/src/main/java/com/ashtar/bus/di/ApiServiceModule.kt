@@ -1,6 +1,6 @@
 package com.ashtar.bus.di
 
-import com.ashtar.bus.common.SessionManager
+import com.ashtar.bus.common.BusApiInterceptor
 import com.ashtar.bus.data.network.BusApiService
 import com.ashtar.bus.data.network.TokenApiService
 import dagger.Module
@@ -24,14 +24,9 @@ object ApiServiceModule {
     }
 
     @Provides
-    fun provideBusApiService(sessionManager: SessionManager): BusApiService {
+    fun provideBusApiService(busApiInterceptor: BusApiInterceptor): BusApiService {
         val client = OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                val request = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer ${sessionManager.accessToken}")
-                    .build()
-                chain.proceed(request)
-            }
+            .addInterceptor(busApiInterceptor)
             .build()
         return Retrofit.Builder()
             .baseUrl("https://tdx.transportdata.tw/api/basic/")

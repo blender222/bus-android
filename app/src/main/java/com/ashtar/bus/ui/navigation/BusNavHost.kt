@@ -6,9 +6,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ashtar.bus.ui.home.HomeScreen
+import com.ashtar.bus.ui.search.SearchScreen
 
 enum class Destination {
-    Home
+    Home,
+    Search
 }
 
 @Composable
@@ -20,7 +22,14 @@ fun BusNavHost(
         startDestination = Destination.Home.name
     ) {
         composable(Destination.Home.name) {
-            HomeScreen()
+            HomeScreen(
+                toSearch = { navController.navigate(Destination.Search.name) }
+            )
+        }
+        composable(Destination.Search.name) {
+            SearchScreen(
+                navigateUp = { navController.navigateUp() }
+            )
         }
     }
 }

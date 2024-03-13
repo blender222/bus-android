@@ -3,6 +3,7 @@ package com.ashtar.bus.di
 import android.content.Context
 import androidx.room.Room
 import com.ashtar.bus.data.AppDatabase
+import com.ashtar.bus.data.dao.RouteDao
 import com.ashtar.bus.data.dao.TokenDao
 import dagger.Module
 import dagger.Provides
@@ -23,5 +24,10 @@ object DatabaseModule {
     @Provides
     fun provideTokenDao(database: AppDatabase): TokenDao {
         return database.tokenDao()
+    }
+
+    @Provides
+    fun provideRouteDao(database: AppDatabase): RouteDao {
+        return database.routeDao()
     }
 }
