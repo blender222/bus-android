@@ -7,10 +7,12 @@ import com.ashtar.bus.common.City
 import com.squareup.moshi.Json
 
 data class Route(
+    val id: String,
     val name: String,
     val city: City,
     val departureStop: String,
     val destinationStop: String,
+    val marked: Boolean
 )
 
 data class RouteJson(
@@ -25,11 +27,11 @@ data class RouteJson(
     @field:Json(name = "DestinationStopNameZh")
     val destinationStop: String,
     @field:Json(name = "UpdateTime")
-    val updateTime: String,
+    val updateTime: String
 ) {
     data class RouteName(
         @field:Json(name = "Zh_tw")
-        val name: String,
+        val name: String
     )
 }
 
@@ -46,14 +48,18 @@ data class RouteEntity(
     @ColumnInfo("destination_stop")
     val destinationStop: String,
     @ColumnInfo("update_time")
-    val updateTime: String
+    val updateTime: String,
+    @ColumnInfo("marked")
+    var marked: Boolean = false
 )
 
 fun List<RouteEntity>.toRouteList(): List<Route> = this.map {
     Route(
+        id = it.id,
         name = it.routeName,
         city = it.city,
         departureStop = it.departureStop,
-        destinationStop = it.destinationStop
+        destinationStop = it.destinationStop,
+        marked = it.marked
     )
 }
