@@ -1,4 +1,4 @@
-package com.ashtar.bus.ui.search
+package com.ashtar.bus.ui.route
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

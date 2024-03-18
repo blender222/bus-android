@@ -1,4 +1,4 @@
-package com.ashtar.bus.ui.search
+package com.ashtar.bus.ui.route
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,7 +23,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.DirectionsBus
-import androidx.compose.material.icons.outlined.ArrowBackIos
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
@@ -55,13 +54,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ashtar.bus.common.City
+import com.ashtar.bus.component.BackIconButton
 import com.ashtar.bus.model.Route
 import kotlinx.coroutines.flow.filter
 
 @Composable
-fun SearchScreen(
+fun RouteScreen(
     navigateUp: () -> Unit,
-    viewModel: SearchViewModel = hiltViewModel()
+    toStop: (String) -> Unit,
+    viewModel: RouteViewModel = hiltViewModel()
 ) {
     ScreenContent(
         state = viewModel.state,
@@ -69,6 +70,7 @@ fun SearchScreen(
         searchedList = viewModel.searchedList,
         markedList = viewModel.markedList,
         navigateUp = navigateUp,
+        toStop = toStop,
         getByKeyboard = viewModel::getByKeyboard,
         getByReplace = viewModel::getByReplace,
         getByInput = viewModel::getByInput,
@@ -79,15 +81,16 @@ fun SearchScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScreenContent(
-    state: SearchState = SearchState.Initial,
+    state: SearchState,
     query: TextFieldValue,
     searchedList: List<Route>,
     markedList: List<Route>,
-    navigateUp: () -> Unit = {},
-    getByKeyboard: (TextFieldValue) -> Unit = {},
-    getByReplace: (String) -> Unit = {},
-    getByInput: (String) -> Unit = {},
-    toggleMarked: (Route) -> Unit = {}
+    navigateUp: () -> Unit,
+    toStop: (String) -> Unit,
+    getByKeyboard: (TextFieldValue) -> Unit,
+    getByReplace: (String) -> Unit,
+    getByInput: (String) -> Unit,
+    toggleMarked: (Route) -> Unit
 ) {
     var showKeyboard by remember { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
@@ -162,14 +165,7 @@ fun ScreenContent(
                         )
                     }
                 },
-                navigationIcon = {
-                    IconButton(onClick = navigateUp) {
-                        Icon(
-                            Icons.Outlined.ArrowBackIos,
-                            contentDescription = "返回"
-                        )
-                    }
-                },
+                navigationIcon = { BackIconButton(navigateUp) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.LightGray
                 )
@@ -188,9 +184,9 @@ fun ScreenContent(
                 when {
                     searchedList.isNotEmpty() -> itemsIndexed(searchedList) { index, route ->
                         if (index > 0) {
-                            GrayDivider()
+                            GrayDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
-                        RouteCard(route, toggleMarked)
+                        RouteCard(route, toStop, toggleMarked)
                     }
                     state == SearchState.NoResult -> item {
                         Column(
@@ -212,9 +208,9 @@ fun ScreenContent(
                     }
                     markedList.isNotEmpty() -> itemsIndexed(markedList) { index, route ->
                         if (index > 0) {
-                            GrayDivider()
+                            GrayDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
-                        RouteCard(route, toggleMarked)
+                        RouteCard(route, toStop, toggleMarked)
                     }
                     else -> item {
                         Column(
@@ -250,11 +246,15 @@ fun ScreenContent(
 }
 
 @Composable
-fun RouteCard(route: Route, toggleMarked: (Route) -> Unit) {
+fun RouteCard(
+    route: Route,
+    toStop: (String) -> Unit,
+    toggleMarked: (Route) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {}
+            .clickable { toStop(route.id) }
             .padding(start = 16.dp, end = 8.dp)
     ) {
         Column(
@@ -301,16 +301,16 @@ fun RouteCard(route: Route, toggleMarked: (Route) -> Unit) {
 }
 
 @Composable
-fun GrayDivider() {
+fun GrayDivider(modifier: Modifier = Modifier) {
     Divider(
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = modifier,
         color = Color(0xFFEEEEEE)
     )
 }
 
 @Preview
 @Composable
-fun SearchScreenPreview() {
+fun RouteScreenPreview() {
     val list = List(20) {
         Route(
             id = "",
@@ -322,8 +322,15 @@ fun SearchScreenPreview() {
         )
     }
     ScreenContent(
+        state = SearchState.Initial,
         query = TextFieldValue("307"),
         searchedList = list,
-        markedList = emptyList()
+        markedList = emptyList(),
+        navigateUp = {},
+        toStop = {},
+        getByKeyboard = {},
+        getByReplace = {},
+        getByInput = {},
+        toggleMarked = {}
     )
 }

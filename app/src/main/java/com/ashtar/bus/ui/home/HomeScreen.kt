@@ -22,10 +22,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun HomeScreen(
-    toSearch: () -> Unit,
+    toRoute: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    ScreenContent(toSearch = toSearch)
+    ScreenContent(toSearch = toRoute)
 }
 
 @Composable

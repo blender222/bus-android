@@ -1,4 +1,4 @@
-package com.ashtar.bus.ui.search
+package com.ashtar.bus.ui.route
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(
+class RouteViewModel @Inject constructor(
     private val busRepository: BusRepository
 ) : ViewModel() {
     var state by mutableStateOf(SearchState.Initial)

@@ -17,13 +17,13 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 interface BusRepository {
+    suspend fun refreshRoute()
+
     suspend fun searchRoute(query: String): List<Route>
 
     suspend fun getMarkedList(): Flow<List<Route>>
 
     suspend fun toggleMarked(route: Route)
-
-    suspend fun refreshRoute()
 }
 
 class BusRepositoryImpl @Inject constructor(
@@ -31,38 +31,6 @@ class BusRepositoryImpl @Inject constructor(
     private val database: AppDatabase,
     private val routeDao: RouteDao
 ) : BusRepository {
-    override suspend fun searchRoute(query: String): List<Route> = withContext(Dispatchers.IO) {
-        val result = when {
-            query.isEmpty() -> emptyList()
-            query.matches(Regex("^[紅藍綠橘棕小].*")) -> {
-                routeDao.getList("$query%")
-                    .toRouteList()
-            }
-            query.contains("幹線") -> {
-                routeDao.getList("%$query%")
-                    .toRouteList()
-            }
-            else -> {
-                routeDao.getList("%$query%")
-                    .filter { it.routeName.matches(Regex("^[^0-9]*$query.*", RegexOption.IGNORE_CASE)) }
-                    .toRouteList()
-            }
-        }
-        result
-    }
-
-    override suspend fun getMarkedList(): Flow<List<Route>> = withContext(Dispatchers.IO) {
-        routeDao.getMarkedList().map { it.toRouteList() }
-    }
-
-    override suspend fun toggleMarked(route: Route) = withContext(Dispatchers.IO) {
-        database.withTransaction {
-            val item = routeDao.get(route.id)
-            item.marked = !route.marked
-            routeDao.update(item)
-        }
-    }
-
     override suspend fun refreshRoute() = withContext(Dispatchers.IO) {
         joinAll(
             launch { refreshRouteByCity(City.Taipei) },
@@ -97,6 +65,38 @@ class BusRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             Log.e("refresh error", null, e)
+        }
+    }
+
+    override suspend fun searchRoute(query: String): List<Route> = withContext(Dispatchers.IO) {
+        val result = when {
+            query.isEmpty() -> emptyList()
+            query.matches(Regex("^[紅藍綠橘棕小].*")) -> {
+                routeDao.getList("$query%")
+                    .toRouteList()
+            }
+            query.contains("幹線") -> {
+                routeDao.getList("%$query%")
+                    .toRouteList()
+            }
+            else -> {
+                routeDao.getList("%$query%")
+                    .filter { it.routeName.matches(Regex("^[^0-9]*$query.*", RegexOption.IGNORE_CASE)) }
+                    .toRouteList()
+            }
+        }
+        result
+    }
+
+    override suspend fun getMarkedList(): Flow<List<Route>> = withContext(Dispatchers.IO) {
+        routeDao.getMarkedList().map { it.toRouteList() }
+    }
+
+    override suspend fun toggleMarked(route: Route) = withContext(Dispatchers.IO) {
+        database.withTransaction {
+            val item = routeDao.get(route.id)
+            item.marked = !route.marked
+            routeDao.update(item)
         }
     }
 }

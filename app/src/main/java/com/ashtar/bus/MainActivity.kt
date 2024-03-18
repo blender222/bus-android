@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.ashtar.bus.ui.navigation.BusNavHost
+import com.ashtar.bus.ui.navigation.AppNavHost
 import com.ashtar.bus.ui.theme.BusTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    BusNavHost()
+                    AppNavHost()
                 }
             }
         }
