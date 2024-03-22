@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ashtar.bus.common.City
 import com.ashtar.bus.component.BackIconButton
+import com.ashtar.bus.component.GrayDivider
 import com.ashtar.bus.model.Route
 import kotlinx.coroutines.flow.filter
 
@@ -167,7 +167,7 @@ fun ScreenContent(
                 },
                 navigationIcon = { BackIconButton(navigateUp) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.LightGray
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
@@ -186,7 +186,7 @@ fun ScreenContent(
                         if (index > 0) {
                             GrayDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
-                        RouteCard(route, toStop, toggleMarked)
+                        RouteItem(route, toStop, toggleMarked)
                     }
                     state == SearchState.NoResult -> item {
                         Column(
@@ -210,7 +210,7 @@ fun ScreenContent(
                         if (index > 0) {
                             GrayDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
-                        RouteCard(route, toStop, toggleMarked)
+                        RouteItem(route, toStop, toggleMarked)
                     }
                     else -> item {
                         Column(
@@ -246,7 +246,7 @@ fun ScreenContent(
 }
 
 @Composable
-fun RouteCard(
+fun RouteItem(
     route: Route,
     toStop: (String) -> Unit,
     toggleMarked: (Route) -> Unit
@@ -300,17 +300,9 @@ fun RouteCard(
     }
 }
 
-@Composable
-fun GrayDivider(modifier: Modifier = Modifier) {
-    Divider(
-        modifier = modifier,
-        color = Color(0xFFEEEEEE)
-    )
-}
-
 @Preview
 @Composable
-fun RouteScreenPreview() {
+fun RoutePreview() {
     val list = List(20) {
         Route(
             id = "",

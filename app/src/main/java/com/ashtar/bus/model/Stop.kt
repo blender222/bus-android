@@ -11,8 +11,10 @@ data class StopOfRoute(
 data class Stop(
     val id: String,
     val name: String,
-    val stopStatus: StopStatus = StopStatus.Normal,
-    val estimatedMin: Int? = null
+    val direction: Int,
+    val stopStatus: StopStatus,
+    val estimatedMin: Int?,
+    val plateNumbs: List<String>
 )
 
 data class StopOfRouteJson(
@@ -41,4 +43,11 @@ data class EstimatedTimeJson(
     val stopStatus: Int,
     @field:Json(name = "EstimateTime")
     val estimatedTime: Int?
+)
+
+data class VehicleOfStopJson(
+    @field:Json(name = "StopUID")
+    val stopId: String,
+    @field:Json(name = "PlateNumb")
+    val plateNumb: String
 )

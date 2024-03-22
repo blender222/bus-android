@@ -3,6 +3,7 @@ package com.ashtar.bus.data.network
 import com.ashtar.bus.model.EstimatedTimeJson
 import com.ashtar.bus.model.RouteJson
 import com.ashtar.bus.model.StopOfRouteJson
+import com.ashtar.bus.model.VehicleOfStopJson
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -29,4 +30,11 @@ interface BusApiService {
         @Path("RouteName") routeName: String,
         @Query("\$filter") filter: String
     ): List<EstimatedTimeJson>
+
+    @GET("v2/Bus/RealTimeNearStop/City/{City}/{RouteName}?\$select=StopUID,PlateNumb&\$orderby=Direction,StopSequence")
+    suspend fun getVehicleOfStop(
+        @Path("City") city: String,
+        @Path("RouteName") routeName: String,
+        @Query("\$filter") filter: String
+    ): List<VehicleOfStopJson>
 }

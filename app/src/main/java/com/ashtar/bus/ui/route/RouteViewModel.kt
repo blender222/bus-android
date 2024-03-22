@@ -7,7 +7,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ashtar.bus.data.BusRepository
+import com.ashtar.bus.data.RouteRepository
 import com.ashtar.bus.model.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RouteViewModel @Inject constructor(
-    private val busRepository: BusRepository
+    private val routeRepository: RouteRepository
 ) : ViewModel() {
     var state by mutableStateOf(SearchState.Initial)
         private set
@@ -35,7 +35,7 @@ class RouteViewModel @Inject constructor(
 
     private fun getMarkedList() {
         viewModelScope.launch {
-            busRepository.getMarkedList().collect {
+            routeRepository.getMarkedList().collect {
                 markedList = it
             }
         }
@@ -64,14 +64,14 @@ class RouteViewModel @Inject constructor(
 
     fun toggleMarked(route: Route) {
         viewModelScope.launch {
-            busRepository.toggleMarked(route)
+            routeRepository.toggleMarked(route)
             search()
         }
     }
 
     private fun search(text: String = query.text) {
         viewModelScope.launch {
-            searchedList = busRepository.searchRoute(text)
+            searchedList = routeRepository.searchRoute(text)
             state = if (text.isNotEmpty() && searchedList.isEmpty()) {
                 SearchState.NoResult
             } else {

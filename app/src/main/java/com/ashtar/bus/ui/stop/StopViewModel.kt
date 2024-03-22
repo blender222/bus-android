@@ -7,12 +7,20 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ashtar.bus.data.GroupRepository
 import com.ashtar.bus.data.StopRepository
+import com.ashtar.bus.model.Group
 import com.ashtar.bus.model.Route
+import com.ashtar.bus.model.Stop
 import com.ashtar.bus.model.StopOfRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,12 +29,13 @@ const val REFRESH_INTERVAL = 20
 @HiltViewModel
 class StopViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val stopRepository: StopRepository
+    private val stopRepository: StopRepository,
+    private val groupRepository: GroupRepository
 ) : ViewModel() {
     private val routeId: String = checkNotNull(savedStateHandle["routeId"])
 
-    var state by mutableStateOf(UiState.Loading)
-        private set
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     var route: Route by mutableStateOf(Route())
         private set
@@ -43,10 +52,12 @@ class StopViewModel @Inject constructor(
         nextUpdateIn = REFRESH_INTERVAL
         refreshJob = viewModelScope.launch {
             try {
-                if (state == UiState.Loading) {
+                if (_uiState.value.isLoading) {
                     route = stopRepository.getRoute(routeId)
-                    stopOfRouteList = stopRepository.getStopOfRouteList2(route)
-                    state = UiState.Started
+                    stopOfRouteList = stopRepository.getStopOfRouteList(route)
+                    _uiState.update {
+                        it.copy(isLoading = false)
+                    }
                     countdown()
                 }
                 while (true) {
@@ -67,9 +78,33 @@ class StopViewModel @Inject constructor(
             nextUpdateIn = i
         }
     }
+
+    suspend fun getAllGroup(): List<Group> {
+        return groupRepository.getAllGroup().first()
+    }
+
+    fun insertMarkedStop(group: Group, stop: Stop) {
+        viewModelScope.launch {
+            stopRepository.insertMarkedStop(routeId, group.id, stop)
+        }
+    }
+
+    fun insertGroupWithMarkedStop(name: String, stop: Stop) {
+        viewModelScope.launch {
+            stopRepository.insertGroupWithMarkedStop(routeId, name, stop)
+        }
+    }
 }
 
-enum class UiState {
-    Loading,
-    Started
+data class UiState(
+    val isLoading: Boolean = true,
+)
+
+sealed interface Dialog {
+    data object None : Dialog
+    data object Menu : Dialog
+    data class AddToGroup(
+        val groupList: List<Group>
+    ) : Dialog
+    data object NewGroup : Dialog
 }
