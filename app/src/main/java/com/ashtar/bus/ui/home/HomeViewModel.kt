@@ -1,46 +1,56 @@
 package com.ashtar.bus.ui.home
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ashtar.bus.common.SessionManager
-import com.ashtar.bus.data.GroupRepository
-import com.ashtar.bus.data.RouteRepository
+import com.ashtar.bus.data.MarkedStopRepository
 import com.ashtar.bus.model.Group
 import com.ashtar.bus.model.MarkedStop
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+const val REFRESH_INTERVAL = 20
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val sessionManager: SessionManager,
-    private val routeRepository: RouteRepository,
-    private val groupRepository: GroupRepository
+    private val markedStopRepository: MarkedStopRepository
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
-    val uiState = _uiState.asStateFlow()
+    val groupList: StateFlow<List<Pair<Group, List<MarkedStop>>>?> = markedStopRepository
+        .getAllGroupWithMarkedStopList()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = null
+        )
 
-    init {
-        viewModelScope.launch {
-            sessionManager.initToken()
-            routeRepository.refreshRoute()
-            groupRepository
-                .getAllGroupWithMarkedStopList()
-                .collect { list ->
-                    _uiState.update {
-                        UiState.Success(groupList = list)
+    var nextUpdateIn: Int by mutableIntStateOf(REFRESH_INTERVAL)
+        private set
+
+    private lateinit var refreshJob: Job
+
+    fun startRefreshJob() {
+        refreshJob = viewModelScope.launch {
+            try {
+                while (true) {
+                    markedStopRepository.updateEstimatedTime()
+                    for (i in REFRESH_INTERVAL downTo 1) {
+                        nextUpdateIn = i
+                        delay(1000)
                     }
                 }
+            } catch (_: Exception) {}
         }
     }
-}
 
-sealed interface UiState {
-    data object Loading : UiState
-    data class Success(
-        val groupList: List<Pair<Group, List<MarkedStop>>>
-    ) : UiState
+    fun stopRefreshJob() {
+        refreshJob.cancel()
+    }
 }

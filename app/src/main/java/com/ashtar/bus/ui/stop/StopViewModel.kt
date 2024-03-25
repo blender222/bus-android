@@ -8,6 +8,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ashtar.bus.data.GroupRepository
+import com.ashtar.bus.data.MarkedStopRepository
+import com.ashtar.bus.data.RouteRepository
 import com.ashtar.bus.data.StopRepository
 import com.ashtar.bus.model.Group
 import com.ashtar.bus.model.Route
@@ -29,8 +31,10 @@ const val REFRESH_INTERVAL = 20
 @HiltViewModel
 class StopViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val routeRepository: RouteRepository,
+    private val groupRepository: GroupRepository,
     private val stopRepository: StopRepository,
-    private val groupRepository: GroupRepository
+    private val markedStopRepository: MarkedStopRepository
 ) : ViewModel() {
     private val routeId: String = checkNotNull(savedStateHandle["routeId"])
 
@@ -53,7 +57,7 @@ class StopViewModel @Inject constructor(
         refreshJob = viewModelScope.launch {
             try {
                 if (_uiState.value.isLoading) {
-                    route = stopRepository.getRoute(routeId)
+                    route = routeRepository.getRoute(routeId)
                     stopOfRouteList = stopRepository.getStopOfRouteList(route)
                     _uiState.update {
                         it.copy(isLoading = false)
@@ -61,7 +65,7 @@ class StopViewModel @Inject constructor(
                     countdown()
                 }
                 while (true) {
-                    stopOfRouteList = stopRepository.updateEstimatedTime(route, stopOfRouteList)
+                    stopOfRouteList = stopRepository.updateRouteEstimatedTime(route, stopOfRouteList)
                     countdown()
                 }
             } catch (_: Exception) {}
@@ -85,13 +89,13 @@ class StopViewModel @Inject constructor(
 
     fun insertMarkedStop(group: Group, stop: Stop) {
         viewModelScope.launch {
-            stopRepository.insertMarkedStop(routeId, group.id, stop)
+            markedStopRepository.insertMarkedStop(routeId, group.id, stop)
         }
     }
 
     fun insertGroupWithMarkedStop(name: String, stop: Stop) {
         viewModelScope.launch {
-            stopRepository.insertGroupWithMarkedStop(routeId, name, stop)
+            markedStopRepository.insertGroupWithMarkedStop(routeId, name, stop)
         }
     }
 }

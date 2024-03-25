@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -172,9 +171,7 @@ fun ScreenContent(
                         .weight(1f),
                     verticalAlignment = Alignment.Top
                 ) { page ->
-                    LazyColumn(
-                        contentPadding = PaddingValues(vertical = 4.dp)
-                    ) {
+                    LazyColumn {
                         itemsIndexed(
                             stopOfRouteList[page].stops,
                             key = { _, stop -> stop.id }

@@ -1,4 +1,4 @@
-package com.ashtar.bus.ui.navigation
+package com.ashtar.bus.ui
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ashtar.bus.ui.group_manage.GroupManageScreen
 import com.ashtar.bus.ui.home.HomeScreen
+import com.ashtar.bus.ui.marked_stop_manage.MarkedStopManageScreen
 import com.ashtar.bus.ui.route.RouteScreen
 import com.ashtar.bus.ui.stop.StopScreen
 
@@ -16,7 +17,8 @@ enum class Destination {
     Home,
     Route,
     Stop,
-    GroupManage
+    GroupManage,
+    MarkedStopManage
 }
 
 @Composable
@@ -32,8 +34,14 @@ fun AppNavHost(
                 toRoute = {
                     navController.navigate(Destination.Route.name)
                 },
+                toStop = { routeId ->
+                    navController.navigate("${Destination.Stop.name}/$routeId")
+                },
                 toGroupManage = {
                     navController.navigate(Destination.GroupManage.name)
+                },
+                toMarkedStopManage = { groupId ->
+                    navController.navigate("${Destination.MarkedStopManage.name}/$groupId")
                 }
             )
         }
@@ -55,6 +63,18 @@ fun AppNavHost(
         composable(Destination.GroupManage.name) {
             GroupManageScreen(
                 navigateUp = { navController.navigateUp() }
+            )
+        }
+        composable("${Destination.MarkedStopManage.name}/{groupId}", arguments = listOf(
+            navArgument("groupId") { type = NavType.IntType }
+        )) {
+            MarkedStopManageScreen(
+                navigateUp = { navController.navigateUp() },
+                toRoute = {
+                    navController.navigate(Destination.Route.name) {
+                        popUpTo(Destination.Home.name)
+                    }
+                }
             )
         }
     }

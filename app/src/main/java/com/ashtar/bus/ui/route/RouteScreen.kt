@@ -184,7 +184,7 @@ fun ScreenContent(
                 when {
                     searchedList.isNotEmpty() -> itemsIndexed(searchedList) { index, route ->
                         if (index > 0) {
-                            GrayDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                            GrayDivider(Modifier.padding(horizontal = 16.dp))
                         }
                         RouteItem(route, toStop, toggleMarked)
                     }
@@ -208,7 +208,7 @@ fun ScreenContent(
                     }
                     markedList.isNotEmpty() -> itemsIndexed(markedList) { index, route ->
                         if (index > 0) {
-                            GrayDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                            GrayDivider(Modifier.padding(horizontal = 16.dp))
                         }
                         RouteItem(route, toStop, toggleMarked)
                     }
