@@ -70,7 +70,7 @@ class StopRepositoryImpl @Inject constructor(
                                     id = item.id,
                                     name = item.stopName.name,
                                     direction = stopOfRouteJson.direction,
-                                    stopStatus = StopStatus.Normal,
+                                    stopStatus = StopStatus.NotDepart,
                                     estimatedMin = null,
                                     plateNumbs = plateNumbs
                                 )
