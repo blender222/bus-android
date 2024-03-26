@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -118,7 +119,7 @@ fun ScreenContent(
     } else {
         var menuExpanded by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
-        val pagerState = rememberPagerState { groupList.size }
+        val pagerState = key(groupList) { rememberPagerState { groupList.size } }
         val currentGroup = groupList.getOrNull(pagerState.currentPage)?.first
 
         Scaffold(
