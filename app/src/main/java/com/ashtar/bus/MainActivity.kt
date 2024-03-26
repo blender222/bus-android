@@ -39,6 +39,7 @@ class MainActivity : ComponentActivity() {
                     var isLoading by rememberSaveable { mutableStateOf(true) }
 
                     LaunchedEffect(Unit) {
+                        initialRepository.prepopulateData()
                         sessionManager.initToken()
                         initialRepository.refreshRoute()
                         isLoading = false

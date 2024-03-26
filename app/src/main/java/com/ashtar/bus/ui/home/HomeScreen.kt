@@ -204,11 +204,11 @@ fun ScreenContent(
                                     coroutineScope.launch {
                                         pagerState.animateScrollToPage(index)
                                     }
-                                }
+                                },
+                                modifier = Modifier.height(48.dp)
                             ) {
                                 Text(
                                     text = group.name,
-                                    modifier = Modifier.padding(vertical = 8.dp),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }
