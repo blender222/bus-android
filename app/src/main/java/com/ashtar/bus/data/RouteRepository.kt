@@ -33,8 +33,31 @@ class RouteRepositoryImpl @Inject constructor(
                 routeDao.getList("$query%")
                     .toRouteList()
             }
-            query.contains("幹線") -> {
+            query.contains(Regex("幹線|先導|南軟|花季|貓空|跳蛙|懷恩")) -> {
                 routeDao.getList("%$query%")
+                    .toRouteList()
+            }
+            query.contains(Regex("內科")) -> {
+                routeDao.getList("%$query%")
+                    .sortedWith { a, b ->
+                        val textA = a.routeName.filter { !it.isDigit() }
+                        val textB = b.routeName.filter { !it.isDigit() }
+                        val numA = a.routeName.filter { it.isDigit() }.toIntOrNull()
+                        val numB = b.routeName.filter { it.isDigit() }.toIntOrNull()
+                        when {
+                            numA == null || numB == null -> textA.compareTo(textB)
+                            textA == textB -> numA - numB
+                            textA > textB -> 1
+                            else -> -1
+                        }
+                    }
+                    .toRouteList()
+            }
+            query.contains(Regex("市民|夜")) -> {
+                routeDao.getList("%$query%")
+                    .sortedBy { item ->
+                        item.routeName.filter { it.isDigit() }.toIntOrNull()
+                    }
                     .toRouteList()
             }
             else -> {

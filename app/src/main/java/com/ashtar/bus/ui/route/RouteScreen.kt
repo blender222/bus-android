@@ -96,6 +96,7 @@ fun ScreenContent(
     toggleMarked: (Route) -> Unit
 ) {
     var showKeyboard by remember { mutableStateOf(true) }
+    var keyboardMore by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -164,7 +165,7 @@ fun ScreenContent(
                                         }
                                     }
                                 }
-                            },
+                            }
                         )
                     }
                 },
@@ -239,11 +240,13 @@ fun ScreenContent(
             }
             if (showKeyboard) {
                 SearchKeyboard(
+                    keyboardMore = keyboardMore,
+                    setKeyboardMore = { keyboardMore = it },
+                    getByReplace = getByReplace,
+                    getByInput = getByInput,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    getByReplace = getByReplace,
-                    getByInput = getByInput
+                        .align(Alignment.BottomCenter)
                 )
             }
         }
