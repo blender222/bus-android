@@ -183,10 +183,13 @@ fun ScreenContent(
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                state = listState,
+                state = listState
             ) {
                 when {
-                    searchedList.isNotEmpty() -> itemsIndexed(searchedList) { index, route ->
+                    searchedList.isNotEmpty() -> itemsIndexed(
+                        items = searchedList,
+                        key = { _, it -> it.id }
+                    ) { index, route ->
                         if (index > 0) {
                             GrayDivider(Modifier.padding(horizontal = 16.dp))
                         }
@@ -211,7 +214,10 @@ fun ScreenContent(
                             )
                         }
                     }
-                    markedList.isNotEmpty() -> itemsIndexed(markedList) { index, route ->
+                    markedList.isNotEmpty() -> itemsIndexed(
+                        items = markedList,
+                        key = { _, it -> it.id }
+                    ) { index, route ->
                         if (index > 0) {
                             GrayDivider(Modifier.padding(horizontal = 16.dp))
                         }

@@ -224,7 +224,10 @@ fun ScreenContent(
                             SearchPlaceholder(toRoute)
                         } else {
                             LazyColumn {
-                                itemsIndexed(list) { index, item: MarkedStop ->
+                                itemsIndexed(
+                                    items = list,
+                                    key = { _, it -> it.id }
+                                ) { index, item: MarkedStop ->
                                     if (index > 0) {
                                         GrayDivider(Modifier.padding(horizontal = 16.dp))
                                     }
