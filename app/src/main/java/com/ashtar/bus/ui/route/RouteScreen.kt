@@ -272,7 +272,7 @@ fun RouteItem(
                 text = route.name,
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Medium
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(

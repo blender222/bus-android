@@ -34,15 +34,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -91,8 +89,12 @@ fun StopScreen(
         route = viewModel.route,
         stopOfRouteList = viewModel.stopOfRouteList,
         nextUpdateIn = viewModel.nextUpdateIn,
+        dialog = viewModel.dialog,
         navigateUp = navigateUp,
-        getAllGroup = viewModel::getAllGroup,
+        openMenuDialog = viewModel::openMenuDialog,
+        openAddToGroupDialog = viewModel::openAddToGroupDialog,
+        openNewGroupDialog = viewModel::openNewGroupDialog,
+        closeDialog = viewModel::closeDialog,
         insertMarkedStop = viewModel::insertMarkedStop,
         insertGroupWithMarkedStop = viewModel::insertGroupWithMarkedStop
     )
@@ -104,8 +106,12 @@ fun ScreenContent(
     route: Route,
     stopOfRouteList: List<StopOfRoute>,
     nextUpdateIn: Int,
+    dialog: Dialog,
     navigateUp: () -> Unit = {},
-    getAllGroup: suspend () -> List<Group> = { emptyList() },
+    openMenuDialog: (Stop) -> Unit = {},
+    openAddToGroupDialog: (Stop) -> Unit = {},
+    openNewGroupDialog: (Stop) -> Unit = {},
+    closeDialog: () -> Unit = {},
     insertMarkedStop: (Group, Stop) -> Unit = { _, _ -> },
     insertGroupWithMarkedStop: (String, Stop) -> Unit = { _, _ -> }
 ) {
@@ -183,9 +189,7 @@ fun ScreenContent(
                             }
                             StopItem(
                                 stop = stop,
-                                getAllGroup = getAllGroup,
-                                insertMarkedStop = insertMarkedStop,
-                                insertGroupWithMarkedStop = insertGroupWithMarkedStop
+                                modifier = Modifier.clickable { openMenuDialog(stop) }
                             )
                         }
                     }
@@ -206,27 +210,46 @@ fun ScreenContent(
                 )
             }
         }
+
+        when (dialog) {
+            is Dialog.None -> {}
+            is Dialog.Menu -> {
+                MenuDialog(
+                    stop = dialog.stop,
+                    openAddToGroupDialog = { openAddToGroupDialog(dialog.stop) },
+                    closeDialog = closeDialog
+                )
+            }
+            is Dialog.AddToGroup -> {
+                AddToGroupDialog(
+                    stop = dialog.stop,
+                    groupList = dialog.groupList,
+                    openNewGroupDialog = { openNewGroupDialog(dialog.stop) },
+                    closeDialog = closeDialog,
+                    insertMarkedStop = insertMarkedStop
+                )
+            }
+            is Dialog.NewGroup -> {
+                NewGroupDialog(
+                    stop = dialog.stop,
+                    closeDialog = closeDialog,
+                    insertGroupWithMarkedStop = insertGroupWithMarkedStop
+                )
+            }
+        }
     }
 }
 
 @Composable
 fun StopItem(
     stop: Stop,
-    getAllGroup: suspend () -> List<Group>,
-    insertMarkedStop: (Group, Stop) -> Unit,
-    insertGroupWithMarkedStop: (String, Stop) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    var dialog: Dialog by remember { mutableStateOf(Dialog.None) }
-
     CompositionLocalProvider(
         LocalTextStyle provides TextStyle(textAlign = TextAlign.Center)
     ) {
         Row(
-            modifier = modifier
-                .clickable(onClick = { dialog = Dialog.Menu })
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+            modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             when {
@@ -244,7 +267,8 @@ fun StopItem(
                             ) {
                                 Text(
                                     text = stop.estimatedMin.toString(),
-                                    style = MaterialTheme.typography.headlineSmall
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Medium
                                 )
                                 Spacer(Modifier.width(4.dp))
                                 Text(
@@ -320,37 +344,6 @@ fun StopItem(
             }
         }
     }
-
-    when (dialog) {
-        is Dialog.None -> {}
-        is Dialog.Menu -> {
-            MenuDialog(
-                stop = stop,
-                openAddToGroupDialog = {
-                    coroutineScope.launch {
-                        dialog = Dialog.AddToGroup(groupList = getAllGroup())
-                    }
-                },
-                closeDialog = { dialog = Dialog.None }
-            )
-        }
-        is Dialog.AddToGroup -> {
-            AddToGroupDialog(
-                stop = stop,
-                groupList = (dialog as Dialog.AddToGroup).groupList,
-                openNewGroupDialog = { dialog = Dialog.NewGroup },
-                closeDialog = { dialog = Dialog.None },
-                insertMarkedStop = insertMarkedStop
-            )
-        }
-        is Dialog.NewGroup -> {
-            NewGroupDialog(
-                stop = stop,
-                closeDialog = { dialog = Dialog.None },
-                insertGroupWithMarkedStop = insertGroupWithMarkedStop
-            )
-        }
-    }
 }
 
 @Preview
@@ -408,6 +401,7 @@ fun StopPreview() {
                 )
             ),
             nextUpdateIn = 20,
+            dialog = Dialog.None
         )
     }
 }

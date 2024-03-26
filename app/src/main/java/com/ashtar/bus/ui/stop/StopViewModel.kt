@@ -50,6 +50,9 @@ class StopViewModel @Inject constructor(
     var nextUpdateIn: Int by mutableIntStateOf(REFRESH_INTERVAL)
         private set
 
+    var dialog: Dialog by mutableStateOf(Dialog.None)
+        private set
+
     private lateinit var refreshJob: Job
 
     fun startRefreshJob() {
@@ -83,8 +86,26 @@ class StopViewModel @Inject constructor(
         }
     }
 
-    suspend fun getAllGroup(): List<Group> {
-        return groupRepository.getAllGroup().first()
+    fun openMenuDialog(stop: Stop) {
+        dialog = Dialog.Menu(stop)
+    }
+
+    fun openAddToGroupDialog(stop: Stop) {
+        viewModelScope.launch {
+            val groupList = groupRepository.getAllGroup().first()
+            dialog = Dialog.AddToGroup(
+                stop = stop,
+                groupList = groupList
+            )
+        }
+    }
+
+    fun openNewGroupDialog(stop: Stop) {
+        dialog = Dialog.NewGroup(stop)
+    }
+
+    fun closeDialog() {
+        dialog = Dialog.None
     }
 
     fun insertMarkedStop(group: Group, stop: Stop) {
@@ -101,14 +122,19 @@ class StopViewModel @Inject constructor(
 }
 
 data class UiState(
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = true
 )
 
 sealed interface Dialog {
     data object None : Dialog
-    data object Menu : Dialog
+    data class Menu(
+        val stop: Stop
+    ) : Dialog
     data class AddToGroup(
+        val stop: Stop,
         val groupList: List<Group>
     ) : Dialog
-    data object NewGroup : Dialog
+    data class NewGroup(
+        val stop: Stop
+    ) : Dialog
 }

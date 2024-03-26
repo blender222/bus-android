@@ -116,7 +116,8 @@ fun ScreenContent(
                 Icon(
                     Icons.Filled.LibraryBooks,
                     contentDescription = null,
-                    modifier = Modifier.size(108.dp)
+                    modifier = Modifier.size(108.dp),
+                    tint = MaterialTheme.colorScheme.outline
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
