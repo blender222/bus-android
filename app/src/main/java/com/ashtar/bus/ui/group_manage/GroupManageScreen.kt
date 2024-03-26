@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +52,7 @@ import com.ashtar.bus.component.DeleteDialog
 import com.ashtar.bus.component.GrayDivider
 import com.ashtar.bus.component.TopBar
 import com.ashtar.bus.model.Group
+import com.ashtar.bus.ui.theme.BusTheme
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyColumnState
 
@@ -91,7 +93,12 @@ fun ScreenContent(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { openAddDialog = true },
-                shape = CircleShape
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.primary,
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 3.dp
+                )
             ) {
                 Icon(
                     Icons.Filled.Add,
@@ -178,13 +185,15 @@ fun GroupList(
                         IconButton(onClick = { openDeleteDialog = true }) {
                             Icon(
                                 Icons.Filled.Delete,
-                                contentDescription = "刪除群組"
+                                contentDescription = "刪除群組",
+                                tint = MaterialTheme.colorScheme.secondary
                             )
                         }
                         IconButton(onClick = { openUpdateDialog = true }) {
                             Icon(
                                 Icons.Filled.Edit,
-                                contentDescription = "修改名稱"
+                                contentDescription = "修改名稱",
+                                tint = MaterialTheme.colorScheme.secondary
                             )
                         }
                         IconButton(
@@ -195,7 +204,8 @@ fun GroupList(
                         ) {
                             Icon(
                                 Icons.Filled.Reorder,
-                                contentDescription = "修改排序"
+                                contentDescription = "修改排序",
+                                tint = MaterialTheme.colorScheme.secondary
                             )
                         }
                     }
@@ -326,12 +336,14 @@ fun UpdateDialog(
 @Preview
 @Composable
 fun GroupManagePreview() {
-    ScreenContent(
-        blocking = false,
-        groupList = listOf(
-            Group(id = 1, sort = 1, name = "上班"),
-            Group(id = 2, sort = 2, name = "下班"),
-            Group(id = 3, sort = 3, name = "出去玩")
+    BusTheme {
+        ScreenContent(
+            blocking = false,
+            groupList = listOf(
+                Group(id = 1, sort = 1, name = "上班"),
+                Group(id = 2, sort = 2, name = "下班"),
+                Group(id = 3, sort = 3, name = "出去玩")
+            )
         )
-    )
+    }
 }

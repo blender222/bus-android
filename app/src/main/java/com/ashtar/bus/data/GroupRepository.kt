@@ -7,12 +7,10 @@ import com.ashtar.bus.model.Group
 import com.ashtar.bus.model.GroupEntity
 import com.ashtar.bus.model.toEntity
 import com.ashtar.bus.model.toGroupList
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 interface GroupRepository {

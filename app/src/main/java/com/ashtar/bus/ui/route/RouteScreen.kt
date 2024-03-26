@@ -22,7 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
@@ -48,14 +48,17 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalTextInputService
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ashtar.bus.common.City
 import com.ashtar.bus.component.BackIconButton
 import com.ashtar.bus.component.GrayDivider
 import com.ashtar.bus.model.Route
+import com.ashtar.bus.ui.theme.BusTheme
 import kotlinx.coroutines.flow.filter
 
 @Composable
@@ -195,9 +198,10 @@ fun ScreenContent(
                         ) {
                             Spacer(Modifier.height(32.dp))
                             Icon(
-                                Icons.Filled.DirectionsBus,
+                                Icons.Filled.SearchOff,
                                 contentDescription = null,
-                                modifier = Modifier.size(108.dp)
+                                modifier = Modifier.size(108.dp),
+                                tint = MaterialTheme.colorScheme.outline
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
@@ -221,7 +225,8 @@ fun ScreenContent(
                             Icon(
                                 Icons.Outlined.BookmarkAdd,
                                 contentDescription = null,
-                                modifier = Modifier.size(108.dp)
+                                modifier = Modifier.size(108.dp),
+                                tint = MaterialTheme.colorScheme.outline
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
@@ -265,7 +270,9 @@ fun RouteItem(
         ) {
             Text(
                 text = route.name,
-                style = MaterialTheme.typography.titleLarge
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -282,19 +289,22 @@ fun RouteItem(
                     Icon(
                         Icons.Filled.Bookmark,
                         contentDescription = "從常用路線中移除",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 } else {
                     Icon(
                         Icons.Outlined.BookmarkAdd,
                         contentDescription = "加入常用路線",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
+                        tint = MaterialTheme.colorScheme.outline
                     )
                 }
             }
             Text(
                 text = route.city.zhName,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFF666666)
             )
         }
     }
@@ -313,16 +323,18 @@ fun RoutePreview() {
             marked = it % 2 == 0
         )
     }
-    ScreenContent(
-        state = SearchState.Initial,
-        query = TextFieldValue("307"),
-        searchedList = list,
-        markedList = emptyList(),
-        navigateUp = {},
-        toStop = {},
-        getByKeyboard = {},
-        getByReplace = {},
-        getByInput = {},
-        toggleMarked = {}
-    )
+    BusTheme {
+        ScreenContent(
+            state = SearchState.Initial,
+            query = TextFieldValue("307"),
+            searchedList = list,
+            markedList = emptyList(),
+            navigateUp = {},
+            toStop = {},
+            getByKeyboard = {},
+            getByReplace = {},
+            getByInput = {},
+            toggleMarked = {}
+        )
+    }
 }

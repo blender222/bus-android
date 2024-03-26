@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +29,8 @@ fun MarkedStopText(item: MarkedStop, modifier: Modifier = Modifier) {
             Spacer(Modifier.width(8.dp))
             Text(
                 text = "往${item.destination}",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.DarkGray
             )
         }
         Spacer(Modifier.height(4.dp))

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,6 +36,7 @@ import com.ashtar.bus.component.MarkedStopText
 import com.ashtar.bus.component.SearchPlaceholder
 import com.ashtar.bus.component.TopBar
 import com.ashtar.bus.model.MarkedStop
+import com.ashtar.bus.ui.theme.BusTheme
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyColumnState
 
@@ -125,7 +127,8 @@ fun MarkedStopList(
                         ) {
                             Icon(
                                 Icons.Filled.Delete,
-                                contentDescription = "刪除站牌"
+                                contentDescription = "刪除站牌",
+                                tint = MaterialTheme.colorScheme.secondary
                             )
                         }
                         IconButton(
@@ -136,7 +139,8 @@ fun MarkedStopList(
                         ) {
                             Icon(
                                 Icons.Filled.Reorder,
-                                contentDescription = "修改排序"
+                                contentDescription = "修改排序",
+                                tint = MaterialTheme.colorScheme.secondary
                             )
                         }
                     }
@@ -157,8 +161,10 @@ fun MarkedStopList(
 @Preview
 @Composable
 fun MarkedStopManagePreview() {
-    ScreenContent(
-        blocking = false,
-        stopList = DataProvider.markedStopList
-    )
+    BusTheme {
+        ScreenContent(
+            blocking = false,
+            stopList = DataProvider.markedStopList
+        )
+    }
 }

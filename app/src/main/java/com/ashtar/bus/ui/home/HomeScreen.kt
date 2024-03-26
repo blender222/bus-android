@@ -62,6 +62,7 @@ import com.ashtar.bus.component.MarkedStopText
 import com.ashtar.bus.component.SearchPlaceholder
 import com.ashtar.bus.model.Group
 import com.ashtar.bus.model.MarkedStop
+import com.ashtar.bus.ui.theme.BusTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -201,11 +202,11 @@ fun ScreenContent(
                                     coroutineScope.launch {
                                         pagerState.animateScrollToPage(index)
                                     }
-                                },
-                                modifier = Modifier.height(48.dp)
+                                }
                             ) {
                                 Text(
                                     text = group.name,
+                                    modifier = Modifier.padding(vertical = 8.dp),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }
@@ -258,8 +259,8 @@ fun MarkedStopItem(
                     Surface(
                         modifier = Modifier.size(84.dp, 36.dp),
                         shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.White
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.primary
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.Center,
@@ -281,7 +282,7 @@ fun MarkedStopItem(
                     Surface(
                         modifier = Modifier.size(84.dp, 36.dp),
                         shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.error,
+                        color = Color(0xFFE62424),
                         contentColor = Color.White
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -297,8 +298,8 @@ fun MarkedStopItem(
                 Surface(
                     modifier = Modifier.size(84.dp, 36.dp),
                     shape = MaterialTheme.shapes.small,
-                    color = Color.Gray,
-                    contentColor = Color.White
+                    color = Color(0xFFEAEAEA),
+                    contentColor = Color.DarkGray
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
@@ -317,7 +318,8 @@ fun MarkedStopItem(
         Column(horizontalAlignment = Alignment.End) {
             Text(
                 text = item.city.zhName,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFF666666)
             )
             Spacer(Modifier.height(12.dp))
             Text(
@@ -326,7 +328,8 @@ fun MarkedStopItem(
                 } else {
                     "已更新"
                 },
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFF666666)
             )
         }
     }
@@ -335,15 +338,17 @@ fun MarkedStopItem(
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
-    ScreenContent(
-        // groupList = null,
-        groupList = listOf(
-            Group(id = 1, sort = 1, name = "上班") to DataProvider.markedStopList,
-            Group(id = 2, sort = 2, name = "下班") to emptyList(),
-            Group(id = 3, sort = 3, name = "出去玩") to emptyList(),
-        ),
-        nextUpdateIn = REFRESH_INTERVAL,
-        toRoute = {},
-        toGroupManage = {}
-    )
+    BusTheme {
+        ScreenContent(
+            // groupList = null,
+            groupList = listOf(
+                Group(id = 1, sort = 1, name = "上班") to DataProvider.markedStopList,
+                Group(id = 2, sort = 2, name = "下班") to emptyList(),
+                Group(id = 3, sort = 3, name = "出去玩") to emptyList(),
+            ),
+            nextUpdateIn = REFRESH_INTERVAL,
+            toRoute = {},
+            toGroupManage = {}
+        )
+    }
 }

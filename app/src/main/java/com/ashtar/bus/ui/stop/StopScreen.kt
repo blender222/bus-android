@@ -57,6 +57,7 @@ import com.ashtar.bus.model.Group
 import com.ashtar.bus.model.Route
 import com.ashtar.bus.model.Stop
 import com.ashtar.bus.model.StopOfRoute
+import com.ashtar.bus.ui.theme.BusTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -132,7 +133,8 @@ fun ScreenContent(
         Column(Modifier.padding(padding)) {
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                divider = {}
             ) {
                 stopOfRouteList.forEachIndexed { index, item ->
                     Tab(
@@ -145,7 +147,7 @@ fun ScreenContent(
                     ) {
                         Text(
                             text = "往${item.destination}",
-                            modifier = Modifier.padding(8.dp),
+                            modifier = Modifier.padding(vertical = 8.dp),
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -233,8 +235,8 @@ fun StopItem(
                         Surface(
                             modifier = Modifier.size(84.dp, 36.dp),
                             shape = MaterialTheme.shapes.small,
-                            color = MaterialTheme.colorScheme.primary,
-                            contentColor = Color.White
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.primary
                         ) {
                             Row(
                                 horizontalArrangement = Arrangement.Center,
@@ -256,7 +258,7 @@ fun StopItem(
                         Surface(
                             modifier = Modifier.size(84.dp, 36.dp),
                             shape = MaterialTheme.shapes.small,
-                            color = MaterialTheme.colorScheme.error,
+                            color = Color(0xFFE62424),
                             contentColor = Color.White
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -272,8 +274,8 @@ fun StopItem(
                     Surface(
                         modifier = Modifier.size(84.dp, 36.dp),
                         shape = MaterialTheme.shapes.small,
-                        color = Color.Gray,
-                        contentColor = Color.White
+                        color = Color(0xFFEAEAEA),
+                        contentColor = Color.DarkGray
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
@@ -303,7 +305,7 @@ fun StopItem(
             } else {
                 Surface(
                     shape = MaterialTheme.shapes.extraSmall,
-                    color = Color(0xFF3A923E),
+                    color = Color(0xFF51AF60),
                     contentColor = Color.White
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)) {
@@ -354,56 +356,58 @@ fun StopItem(
 @Preview
 @Composable
 fun StopPreview() {
-    ScreenContent(
-        uiState = UiState(isLoading = false),
-        route = Route(
-            name = "307",
-            departureStop = "板橋",
-            destinationStop = "撫遠街"
-        ),
-        stopOfRouteList = listOf(
-            StopOfRoute(
-                destination = "撫遠街",
-                stops = listOf(
-                    Stop(
-                        id = "",
-                        name = "板橋國中",
-                        direction = 0,
-                        stopStatus = StopStatus.NotDepart,
-                        estimatedMin = null,
-                        plateNumbs = emptyList()
-                    ),
-                    Stop(
-                        id = "",
-                        name = "板橋國中",
-                        direction = 0,
-                        stopStatus = StopStatus.LastPassed,
-                        estimatedMin = null,
-                        plateNumbs = emptyList()
-                    ),
-                    Stop(
-                        id = "",
-                        name = "板橋國中",
-                        direction = 0,
-                        stopStatus = StopStatus.Normal,
-                        estimatedMin = 3,
-                        plateNumbs = listOf("EAL-0072")
-                    ),
-                    Stop(
-                        id = "",
-                        name = "板橋國中",
-                        direction = 0,
-                        stopStatus = StopStatus.Normal,
-                        estimatedMin = 0,
-                        plateNumbs = listOf("259-U5", "EAA-158")
-                    ),
+    BusTheme {
+        ScreenContent(
+            uiState = UiState(isLoading = false),
+            route = Route(
+                name = "307",
+                departureStop = "板橋",
+                destinationStop = "撫遠街"
+            ),
+            stopOfRouteList = listOf(
+                StopOfRoute(
+                    destination = "撫遠街",
+                    stops = listOf(
+                        Stop(
+                            id = "1",
+                            name = "板橋國中",
+                            direction = 0,
+                            stopStatus = StopStatus.NotDepart,
+                            estimatedMin = null,
+                            plateNumbs = emptyList()
+                        ),
+                        Stop(
+                            id = "2",
+                            name = "板橋國中",
+                            direction = 0,
+                            stopStatus = StopStatus.LastPassed,
+                            estimatedMin = null,
+                            plateNumbs = emptyList()
+                        ),
+                        Stop(
+                            id = "3",
+                            name = "板橋國中",
+                            direction = 0,
+                            stopStatus = StopStatus.Normal,
+                            estimatedMin = 3,
+                            plateNumbs = listOf("EAL-0072")
+                        ),
+                        Stop(
+                            id = "4",
+                            name = "板橋國中",
+                            direction = 0,
+                            stopStatus = StopStatus.Normal,
+                            estimatedMin = 0,
+                            plateNumbs = listOf("259-U5", "EAA-158")
+                        ),
+                    )
+                ),
+                StopOfRoute(
+                    destination = "板橋",
+                    stops = emptyList()
                 )
             ),
-            StopOfRoute(
-                destination = "板橋",
-                stops = emptyList()
-            )
-        ),
-        nextUpdateIn = 20,
-    )
+            nextUpdateIn = 20,
+        )
+    }
 }

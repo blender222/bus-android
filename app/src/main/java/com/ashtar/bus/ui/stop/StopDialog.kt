@@ -51,7 +51,7 @@ fun MenuDialog(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                     style = MaterialTheme.typography.titleMedium
                 )
-                Divider()
+                Divider(color = Color.LightGray)
                 Column {
                     Row(
                         modifier = Modifier
@@ -63,7 +63,8 @@ fun MenuDialog(
                         Icon(
                             Icons.Outlined.BookmarkAdd,
                             contentDescription = null,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(32.dp),
+                            tint = Color(0xFF666666)
                         )
                         Spacer(Modifier.width(16.dp))
                         Text(
