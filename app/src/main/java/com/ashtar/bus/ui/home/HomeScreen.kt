@@ -120,7 +120,7 @@ fun ScreenContent(
     } else {
         var menuExpanded by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
-        val pagerState = key(groupList) { rememberPagerState { groupList.size } }
+        val pagerState = key(groupList.size) { rememberPagerState { groupList.size } }
         val currentGroup = groupList.getOrNull(pagerState.currentPage)?.first
 
         Scaffold(
