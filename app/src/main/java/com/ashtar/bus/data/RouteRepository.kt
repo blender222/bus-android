@@ -31,6 +31,9 @@ class RouteRepositoryImpl @Inject constructor(
             query.isEmpty() -> emptyList()
             query.matches(Regex("^[紅藍綠橘棕小].*")) -> {
                 routeDao.getList("$query%")
+                    .sortedBy { item ->
+                        item.routeName.filter { it.isDigit() }.toIntOrNull()
+                    }
                     .toRouteList()
             }
             query.contains(Regex("幹線|先導|南軟|花季|貓空|跳蛙|懷恩")) -> {
