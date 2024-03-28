@@ -1,6 +1,7 @@
 package com.ashtar.bus.data
 
 import androidx.room.withTransaction
+import com.ashtar.bus.common.StopStatus
 import com.ashtar.bus.common.secondsToMinutes
 import com.ashtar.bus.data.dao.MarkedStopDao
 import com.ashtar.bus.data.database.AppDatabase
@@ -30,6 +31,8 @@ interface MarkedStopRepository {
     suspend fun insertGroupWithMarkedStop(routeId: String, name: String, stop: Stop)
 
     suspend fun updateEstimatedTime()
+
+    suspend fun updateOffline()
 
     suspend fun updateSort(idList: List<Int>)
 
@@ -89,16 +92,15 @@ class MarkedStopRepositoryImpl @Inject constructor(
                             city = item.city.name,
                             routeName = item.routeName,
                             filter = "RouteUID eq '${item.routeId}' and StopUID eq '${item.stopId}'"
-                        ).firstOrNull() ?: return@async null
+                        ).firstOrNull()
                         object {
                             val id = item.id
-                            val stopStatus = data.stopStatus
-                            val estimatedMin = data.estimatedTime.secondsToMinutes()
+                            val stopStatus = data?.stopStatus ?: StopStatus.NotDepart.code
+                            val estimatedMin = data?.estimatedTime.secondsToMinutes()
                         }
                     }
                 }
                 .awaitAll()
-                .filterNotNull()
             database.withTransaction {
                 newList.forEach { item ->
                     launch {
@@ -111,6 +113,10 @@ class MarkedStopRepositoryImpl @Inject constructor(
                 }
             }
         }
+    }
+
+    override suspend fun updateOffline() {
+        markedStopDao.updateOffline()
     }
 
     override suspend fun updateSort(idList: List<Int>) {

@@ -64,6 +64,13 @@ interface MarkedStopDao {
     """)
     suspend fun updateStatus(id: Int, stopStatus: Int?, estimatedMin: Int?)
 
+    @Query("""
+        UPDATE marked_stop SET
+            stop_status = -1,
+            estimated_min = null
+    """)
+    suspend fun updateOffline()
+
     @Query("UPDATE marked_stop SET sort = :sort WHERE id = :id")
     suspend fun updateSort(id: Int, sort: Int)
 

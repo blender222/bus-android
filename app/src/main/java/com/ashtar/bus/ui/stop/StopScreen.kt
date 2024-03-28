@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.ashtar.bus.ui.stop
 
@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -33,8 +34,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +50,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.ashtar.bus.common.StopStatus
 import com.ashtar.bus.component.BackIconButton
+import com.ashtar.bus.component.ErrorDialog
 import com.ashtar.bus.component.GrayDivider
 import com.ashtar.bus.model.Group
 import com.ashtar.bus.model.Route
@@ -83,10 +83,8 @@ fun StopScreen(
         }
     }
 
-    val uiState by viewModel.uiState.collectAsState()
-
     ScreenContent(
-        uiState = uiState,
+        uiState = viewModel.uiState,
         route = viewModel.route,
         stopOfRouteList = viewModel.stopOfRouteList,
         nextUpdateIn = viewModel.nextUpdateIn,
@@ -101,6 +99,7 @@ fun StopScreen(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScreenContent(
     uiState: UiState,
@@ -141,7 +140,9 @@ fun ScreenContent(
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                divider = {}
+                divider = {
+                    Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                }
             ) {
                 stopOfRouteList.forEachIndexed { index, item ->
                     Tab(
@@ -160,60 +161,79 @@ fun ScreenContent(
                     }
                 }
             }
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(60.dp),
-                        strokeWidth = 5.dp
-                    )
+            when (uiState) {
+                UiState.Loading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(60.dp),
+                            strokeWidth = 5.dp
+                        )
+                    }
+                    StatusBar()
                 }
-            } else {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    verticalAlignment = Alignment.Top
-                ) { page ->
-                    LazyColumn {
-                        itemsIndexed(
-                            stopOfRouteList[page].stops,
-                            key = { _, stop -> stop.id }
-                        ) { index, stop ->
-                            if (index > 0) {
-                                GrayDivider()
+                UiState.Error -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    )
+                    StatusBar()
+                }
+                UiState.Loaded, UiState.LoadedOffline -> {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        verticalAlignment = Alignment.Top
+                    ) { page ->
+                        LazyColumn {
+                            itemsIndexed(
+                                stopOfRouteList[page].stops,
+                                key = { _, stop -> stop.id }
+                            ) { index, stop ->
+                                if (index > 0) {
+                                    GrayDivider()
+                                }
+                                StopItem(
+                                    stop = stop,
+                                    modifier = Modifier.clickable { openMenuDialog(stop) }
+                                )
                             }
-                            StopItem(
-                                stop = stop,
-                                modifier = Modifier.clickable { openMenuDialog(stop) }
-                            )
                         }
                     }
+                    StatusBar(
+                        text = when {
+                            uiState == UiState.LoadedOffline -> {
+                                "連線失敗，$nextUpdateIn 秒後重試"
+                            }
+                            nextUpdateIn < REFRESH_INTERVAL -> {
+                                "$nextUpdateIn 秒後更新"
+                            }
+                            else -> {
+                                "到站時間已更新"
+                            }
+                        }
+                    )
                 }
-            }
-            Surface(color = MaterialTheme.colorScheme.primary) {
-                Text(
-                    text = if (nextUpdateIn < REFRESH_INTERVAL) {
-                        "$nextUpdateIn 秒後更新"
-                    } else {
-                        "到站時間已更新"
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.End
-                )
             }
         }
 
         when (dialog) {
             is Dialog.None -> {}
+            is Dialog.Error -> {
+                ErrorDialog(
+                    title = "連線失敗",
+                    content = "請檢查網路連線是否正常",
+                    closeDialog = closeDialog,
+                    confirm = closeDialog
+                )
+            }
             is Dialog.Menu -> {
                 MenuDialog(
                     stop = dialog.stop,
@@ -347,12 +367,26 @@ fun StopItem(
     }
 }
 
+@Composable
+fun StatusBar(text: String = "") {
+    Surface(color = MaterialTheme.colorScheme.primary) {
+        Text(
+            text = text,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.End
+        )
+    }
+}
+
 @Preview
 @Composable
 fun StopPreview() {
     BusTheme {
         ScreenContent(
-            uiState = UiState(isLoading = false),
+            uiState = UiState.Error,
             route = Route(
                 name = "307",
                 departureStop = "板橋",

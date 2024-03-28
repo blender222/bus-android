@@ -18,12 +18,9 @@ import com.ashtar.bus.model.StopOfRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.IOException
 import javax.inject.Inject
 
 const val REFRESH_INTERVAL = 20
@@ -38,8 +35,8 @@ class StopViewModel @Inject constructor(
 ) : ViewModel() {
     private val routeId: String = checkNotNull(savedStateHandle["routeId"])
 
-    private val _uiState = MutableStateFlow(UiState())
-    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    var uiState by mutableStateOf(UiState.Loading)
+        private set
 
     var route: Route by mutableStateOf(Route())
         private set
@@ -58,20 +55,28 @@ class StopViewModel @Inject constructor(
     fun startRefreshJob() {
         nextUpdateIn = REFRESH_INTERVAL
         refreshJob = viewModelScope.launch {
-            try {
-                if (_uiState.value.isLoading) {
+            if (uiState != UiState.Loaded) {
+                try {
                     route = routeRepository.getRoute(routeId)
                     stopOfRouteList = stopRepository.getStopOfRouteList(route)
-                    _uiState.update {
-                        it.copy(isLoading = false)
-                    }
-                    countdown()
+                    uiState = UiState.Loaded
+                    countdown(REFRESH_INTERVAL)
+                } catch (e: IOException) {
+                    uiState = UiState.Error
+                    dialog = Dialog.Error
+                    return@launch
                 }
-                while (true) {
+            }
+            while (true) {
+                try {
                     stopOfRouteList = stopRepository.updateRouteEstimatedTime(route, stopOfRouteList)
-                    countdown()
+                    uiState = UiState.Loaded
+                    countdown(REFRESH_INTERVAL)
+                } catch (e: IOException) {
+                    uiState = UiState.LoadedOffline
+                    countdown(5)
                 }
-            } catch (_: Exception) {}
+            }
         }
     }
 
@@ -79,10 +84,10 @@ class StopViewModel @Inject constructor(
         refreshJob.cancel()
     }
 
-    private suspend fun countdown() {
-        for (i in REFRESH_INTERVAL downTo 0) {
-            delay(1000)
+    private suspend fun countdown(seconds: Int) {
+        for (i in seconds downTo 1) {
             nextUpdateIn = i
+            delay(1000)
         }
     }
 
@@ -121,12 +126,16 @@ class StopViewModel @Inject constructor(
     }
 }
 
-data class UiState(
-    val isLoading: Boolean = true
-)
+enum class UiState {
+    Loading,
+    Error,
+    Loaded,
+    LoadedOffline
+}
 
 sealed interface Dialog {
     data object None : Dialog
+    data object Error : Dialog
     data class Menu(
         val stop: Stop
     ) : Dialog

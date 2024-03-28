@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
@@ -57,9 +58,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import com.ashtar.bus.R
 import com.ashtar.bus.common.DataProvider
 import com.ashtar.bus.component.GrayDivider
-import com.ashtar.bus.component.HomeLoading
 import com.ashtar.bus.component.MarkedStopText
 import com.ashtar.bus.component.SearchPlaceholder
 import com.ashtar.bus.model.Group
@@ -116,7 +117,20 @@ fun ScreenContent(
     toMarkedStopManage: (Int) -> Unit = {}
 ) {
     if (groupList == null) {
-        HomeLoading()
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.app_name)) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = Color.White,
+                        actionIconContentColor = Color.White
+                    )
+                )
+            }
+        ) { padding ->
+            Box(Modifier.padding(padding))
+        }
     } else {
         var menuExpanded by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
@@ -126,7 +140,7 @@ fun ScreenContent(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("上班族等公車") },
+                    title = { Text(stringResource(R.string.app_name)) },
                     actions = {
                         IconButton(onClick = toRoute) {
                             Icon(
@@ -209,6 +223,7 @@ fun ScreenContent(
                             ) {
                                 Text(
                                     text = group.name,
+                                    modifier = Modifier.padding(horizontal = 16.dp),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }

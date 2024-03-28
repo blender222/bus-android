@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.IOException
 import javax.inject.Inject
 
 const val REFRESH_INTERVAL = 20
@@ -38,19 +39,26 @@ class HomeViewModel @Inject constructor(
 
     fun startRefreshJob() {
         refreshJob = viewModelScope.launch {
-            try {
-                while (true) {
+            while (true) {
+                try {
                     markedStopRepository.updateEstimatedTime()
-                    for (i in REFRESH_INTERVAL downTo 1) {
-                        nextUpdateIn = i
-                        delay(1000)
-                    }
+                    countdown(REFRESH_INTERVAL)
+                } catch (e: IOException) {
+                    markedStopRepository.updateOffline()
+                    countdown(5)
                 }
-            } catch (_: Exception) {}
+            }
         }
     }
 
     fun stopRefreshJob() {
         refreshJob.cancel()
+    }
+
+    private suspend fun countdown(seconds: Int) {
+        for (i in seconds downTo 1) {
+            nextUpdateIn = i
+            delay(1000)
+        }
     }
 }

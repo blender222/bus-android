@@ -9,6 +9,10 @@ enum class StopStatus(
     val code: Int,
     val display: String
 ) {
+    Offline(
+        code = -1,
+        display = "網路離線"
+    ),
     Normal(
         code = 0,
         display = "正常"
