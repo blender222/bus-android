@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
@@ -100,15 +101,9 @@ fun ScreenContent(
     val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
-    }
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .filter { isScroll -> isScroll }
-            .collect { showKeyboard = false }
     }
     if (isPressed) {
         showKeyboard = true
@@ -181,65 +176,76 @@ fun ScreenContent(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                state = listState
-            ) {
-                when {
-                    searchedList.isNotEmpty() -> itemsIndexed(
-                        items = searchedList,
-                        key = { _, it -> it.id }
-                    ) { index, route ->
-                        if (index > 0) {
-                            GrayDivider(Modifier.padding(horizontal = 16.dp))
-                        }
-                        RouteItem(route, toStop, toggleMarked)
-                    }
-                    state == SearchState.NoResult -> item {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Spacer(Modifier.height(32.dp))
-                            Icon(
-                                Icons.Filled.SearchOff,
-                                contentDescription = null,
-                                modifier = Modifier.size(108.dp),
-                                tint = MaterialTheme.colorScheme.outline
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = "沒有符合條件的路線",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+            when {
+                searchedList.isNotEmpty() -> {
+                    RouteLazyList(hideKeyboard = { showKeyboard = false }) {
+                        itemsIndexed(
+                            items = searchedList,
+                            key = { _, it -> it.id }
+                        ) { index, route ->
+                            if (index > 0) {
+                                GrayDivider(Modifier.padding(horizontal = 16.dp))
+                            }
+                            RouteItem(route, toStop, toggleMarked)
                         }
                     }
-                    markedList.isNotEmpty() -> itemsIndexed(
-                        items = markedList,
-                        key = { _, it -> it.id }
-                    ) { index, route ->
-                        if (index > 0) {
-                            GrayDivider(Modifier.padding(horizontal = 16.dp))
+                }
+                state == SearchState.NoResult -> {
+                    RouteLazyList(hideKeyboard = { showKeyboard = false }) {
+                        item {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Spacer(Modifier.height(32.dp))
+                                Icon(
+                                    Icons.Filled.SearchOff,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(108.dp),
+                                    tint = MaterialTheme.colorScheme.outline
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = "沒有符合條件的路線",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
                         }
-                        RouteItem(route, toStop, toggleMarked)
                     }
-                    else -> item {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Spacer(Modifier.height(32.dp))
-                            Icon(
-                                Icons.Outlined.BookmarkAdd,
-                                contentDescription = null,
-                                modifier = Modifier.size(108.dp),
-                                tint = MaterialTheme.colorScheme.outline
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = "按下書籤加入常用路線!",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                }
+                markedList.isNotEmpty() -> {
+                    RouteLazyList(hideKeyboard = { showKeyboard = false }) {
+                        itemsIndexed(
+                            items = markedList,
+                            key = { _, it -> it.id }
+                        ) { index, route ->
+                            if (index > 0) {
+                                GrayDivider(Modifier.padding(horizontal = 16.dp))
+                            }
+                            RouteItem(route, toStop, toggleMarked)
+                        }
+                    }
+                }
+                else -> {
+                    RouteLazyList(hideKeyboard = { showKeyboard = false }) {
+                        item {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Spacer(Modifier.height(32.dp))
+                                Icon(
+                                    Icons.Outlined.BookmarkAdd,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(108.dp),
+                                    tint = MaterialTheme.colorScheme.outline
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = "按下書籤加入常用路線!",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
                         }
                     }
                 }
@@ -257,6 +263,25 @@ fun ScreenContent(
             }
         }
     }
+}
+
+@Composable
+fun RouteLazyList(
+    hideKeyboard: () -> Unit,
+    content: LazyListScope.() -> Unit
+) {
+    val listState = rememberLazyListState()
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .filter { isScroll -> isScroll }
+            .collect { hideKeyboard() }
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = listState,
+        content = content
+    )
 }
 
 @Composable
