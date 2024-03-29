@@ -113,9 +113,9 @@ fun MarkedStopList(
             var openDeleteDialog by remember { mutableStateOf(false) }
 
             ReorderableItem(reorderableLazyColumnState, item.id) {
-                Column {
+                Column(Modifier.padding(start = 16.dp, end = 4.dp)) {
                     Row(
-                        modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+                        modifier = Modifier.padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         MarkedStopText(
@@ -144,7 +144,7 @@ fun MarkedStopList(
                             )
                         }
                     }
-                    GrayDivider(Modifier.padding(horizontal = 16.dp))
+                    GrayDivider(Modifier.padding(end = 12.dp))
                 }
             }
             if (openDeleteDialog) {
