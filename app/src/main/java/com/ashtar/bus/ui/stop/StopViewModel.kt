@@ -55,7 +55,7 @@ class StopViewModel @Inject constructor(
     fun startRefreshJob() {
         nextUpdateIn = REFRESH_INTERVAL
         refreshJob = viewModelScope.launch {
-            if (uiState != UiState.Loaded) {
+            if (uiState == UiState.Loading) {
                 try {
                     route = routeRepository.getRoute(routeId)
                     stopOfRouteList = stopRepository.getStopOfRouteList(route)
