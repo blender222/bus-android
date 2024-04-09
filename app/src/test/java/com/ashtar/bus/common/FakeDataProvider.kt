@@ -3,7 +3,7 @@ package com.ashtar.bus.common
 import com.ashtar.bus.model.Route
 import com.ashtar.bus.model.RouteEntity
 
-object DataProvider {
+object FakeDataProvider {
     val RedRawRouteList = listOf(
         RouteEntity(
             id = "TPE15321",
