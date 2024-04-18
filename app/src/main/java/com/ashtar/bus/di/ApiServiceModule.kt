@@ -27,7 +27,7 @@ object ApiServiceModule {
     @Provides
     fun provideTokenRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://bus.eventnow.top/")
+            .baseUrl("https://bus.app-event.site/")
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
     }
